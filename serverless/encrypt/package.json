@@ -1,0 +1,9 @@
+{
+  "name": "storekey",
+  "version": "1.0.0",
+  "description": "Lambda function triggered by the ApiGateway to decript and store a provided key",
+  "main": "app.js",
+  "devDependencies": {
+    "aws-sdk": "^2.739.0"
+  }
+}

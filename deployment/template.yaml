@@ -1,0 +1,175 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: "AWS::Serverless-2016-10-31"
+Description: AWS CloudFormation template for Amazon IVS Rekognition demo - suffix <RANDOM_SUFFIX>
+
+Parameters:
+  DecryptLambdaName:
+    Type: String
+    Description: Name of the lambda function
+    Default: kms-demo-lambda-decrypt
+
+  EncryptLambdaName:
+    Type: String
+    Description: Name of the lambda function
+    Default: kms-demo-lambda-encrypt
+
+  LambdaFunctionsBucketName:
+    Type: String
+    Description: Name of the bucket that contains the Lambda functions zip files
+    Default: kms-demo-lambda-bucket
+
+Resources:
+
+  KmsDemoApi:
+    Type: AWS::ApiGatewayV2::Api
+    Properties:
+      Name: KmsDemoApi
+      ProtocolType: HTTP
+      CorsConfiguration:
+        AllowMethods:
+          - "POST"
+        AllowHeaders:
+          - "x-apigateway-header"
+          - "x-amz-date"
+          - "content-type"
+        AllowOrigins:
+          - "*"
+        MaxAge: 600
+
+  KmsDemoApiDeployment:
+    DependsOn: [KmsDemoApiRoute]
+    Type: AWS::ApiGatewayV2::Deployment
+    Properties:
+      ApiId: !Ref KmsDemoApi
+      StageName: demo
+
+  KmsDemoApiRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref KmsDemoApi
+      RouteKey: POST /decrypt
+      AuthorizationType: NONE
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref KmsDemoApiIntegration
+  KmsDemoApiCreateRoute:
+    Type: AWS::ApiGatewayV2::Route
+    Properties:
+      ApiId: !Ref KmsDemoApi
+      RouteKey: POST /encrypt
+      AuthorizationType: NONE
+      Target: !Join
+        - /
+        - - integrations
+          - !Ref KmsDemoApiCreateIntegration
+
+  KmsDemoApiIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref KmsDemoApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${DecryptLambda.Arn}/invocations
+      IntegrationMethod: POST
+      CredentialsArn: !GetAtt ApiGatewayRole.Arn
+      PayloadFormatVersion: "2.0"
+
+  KmsDemoApiCreateIntegration:
+    Type: AWS::ApiGatewayV2::Integration
+    Properties:
+      ApiId: !Ref KmsDemoApi
+      IntegrationType: AWS_PROXY
+      IntegrationUri: !Sub arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${EncryptLambda.Arn}/invocations
+      IntegrationMethod: POST
+      CredentialsArn: !GetAtt ApiGatewayRole.Arn
+      PayloadFormatVersion: "2.0"
+
+  KmsDemoApiStage:
+    Type: AWS::ApiGatewayV2::Stage
+    Properties:
+      StageName: demo
+      ApiId: !Ref KmsDemoApi
+
+  # Api gateway role
+  ApiGatewayRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Sid: ""
+            Effect: "Allow"
+            Principal:
+              Service:
+                - "apigateway.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: "/"
+      Policies:
+        - PolicyName: LambdaAccess
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: "Allow"
+                Action: "lambda:InvokeFunction"
+                Resource: "*"
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - "kms:Decrypt"
+                  - "kms:Encrypt"
+                  - "kms:GenerateDataKey"
+                  - "secretsmanager:PutSecretValue"
+                  - "secretsmanager:GetSecretValue"
+                  - "secretsmanager:CreateSecret"
+                Resource: "*"
+
+  DecryptLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref LambdaFunctionsBucketName
+        S3Key: decrypt.zip
+      FunctionName: !Ref DecryptLambdaName
+      Handler: app.handler
+      Runtime: nodejs14.x
+
+  EncryptLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        S3Bucket: !Ref LambdaFunctionsBucketName
+        S3Key: encrypt.zip
+      FunctionName: !Ref EncryptLambdaName
+      Handler: app.handler
+      Runtime: nodejs14.x
+
+Outputs:
+  AWSRegion:
+    Value: !Ref AWS::Region
+  
+  ApiEncryt:
+    Description: KMS demo REST API Gateway endpoint URL - /encrypt
+    Value: !Sub "https://${KmsDemoApiCreateIntegration}.execute-api.${AWS::Region}.amazonaws.com/${KmsDemoApiStage}/encrypt"
+  
+  ApiDecryt:
+    Description: KMS demo REST API Gateway endpoint URL - /decrypt
+    Value: !Sub "https://${KmsDemoApiCreateIntegration}.execute-api.${AWS::Region}.amazonaws.com/${KmsDemoApiStage}/decrypt"
