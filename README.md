@@ -1,4 +1,4 @@
-# kms-demo
+# KMS Demo
 A KMS demo application to demonstrate a KMS encrypt and decrypt for passwords storing it in Secret Manager.
 
 ## Deployment
