@@ -19,7 +19,7 @@ Parameters:
     Default: kms-demo-lambda-bucket
 
 Resources:
-
+#Api Gateway
   KmsDemoApi:
     Type: AWS::ApiGatewayV2::Api
     Properties:
@@ -37,14 +37,13 @@ Resources:
         MaxAge: 600
 
   KmsDemoApiDeployment:
-    DependsOn: [KmsDemoApiRoute, KmsDemoApiCreateRoute]
+    DependsOn: [KmsDemoApiRoute,KmsDemoApiCreationRoute]
     Type: AWS::ApiGatewayV2::Deployment
     Properties:
       ApiId: !Ref KmsDemoApi
       StageName: demo
 
   KmsDemoApiRoute:
-    DependsOn: [KmsDemoApiIntegration]
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref KmsDemoApi
@@ -55,8 +54,7 @@ Resources:
         - - integrations
           - !Ref KmsDemoApiIntegration
 
-  KmsDemoApiCreateRoute:
-    DependsOn: [KmsDemoApiCreateIntegration]
+  KmsDemoApiCreationRoute:
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref KmsDemoApi
@@ -65,7 +63,7 @@ Resources:
       Target: !Join
         - /
         - - integrations
-          - !Ref KmsDemoApiCreateIntegration
+          - !Ref KmsDemoCreationApiIntegration
 
   KmsDemoApiIntegration:
     Type: AWS::ApiGatewayV2::Integration
@@ -77,7 +75,7 @@ Resources:
       CredentialsArn: !GetAtt ApiGatewayRole.Arn
       PayloadFormatVersion: "2.0"
 
-  KmsDemoApiCreateIntegration:
+  KmsDemoCreationApiIntegration:
     Type: AWS::ApiGatewayV2::Integration
     Properties:
       ApiId: !Ref KmsDemoApi
@@ -116,7 +114,6 @@ Resources:
               - Effect: "Allow"
                 Action: "lambda:InvokeFunction"
                 Resource: "*"
-  
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -170,10 +167,8 @@ Outputs:
   AWSRegion:
     Value: !Ref AWS::Region
   
-  ApiEncryt:
-    Description: KMS demo REST API Gateway endpoint URL - /encrypt
+  EncryptApi:
     Value: !Sub "https://${KmsDemoApi}.execute-api.${AWS::Region}.amazonaws.com/${KmsDemoApiStage}/encrypt"
-  
-  ApiDecryt:
-    Description: KMS demo REST API Gateway endpoint URL - /decrypt
+
+  DecryptApi:
     Value: !Sub "https://${KmsDemoApi}.execute-api.${AWS::Region}.amazonaws.com/${KmsDemoApiStage}/decrypt"
