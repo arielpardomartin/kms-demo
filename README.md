@@ -28,6 +28,8 @@ At the end of the deploy.sh execution, you will see in the output of CloudFormat
 
 ![output](img/stackoutput.png)
 
+<br>
+
 Now you can *Encrypt* and *Decrypt* the password storing it in Secret Manager.
 ### Encrypt your password
 Go to **Postman** (or any API client) to use the service with the following parameters:
@@ -46,6 +48,8 @@ The output will be the *CiphertextBlob* as follow:
 
 ![encrypt](img/encrypt.png)
 
+<br>
+
 ### Decrypt your password
 Go to **Postman** (or any API client) to use the service with the following parameters:
 ```shell
@@ -59,9 +63,13 @@ The output will be the *ARN* of the item added in Secret Manager as follow:
 
 ![decrypt](img/decrypt.png)
 
+<br>
+
 We can check this new item in Secret Manager:
 
 ![kms](img/kms.png)
+
+<br>
 
 And take a look for the encrypted password:
 
