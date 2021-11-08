@@ -25,3 +25,10 @@ aws cloudformation create-stack --stack-name $stackname \
 printf "\n\nCreating stack \x1b[33mlambdatest\x1b[0m...\n$STACK"
 aws cloudformation wait stack-create-complete --stack-name $stackname
 if [ $? != 0 ]; then exit 1; fi
+
+printf "\n\nSaving stack outputs...\n"
+aws cloudformation describe-stacks --stack-name $stackname > stack.json
+
+printf "\n\nStack creation complete!\n"
+
+node generate-output.js --stackOutputFilePath stack.json

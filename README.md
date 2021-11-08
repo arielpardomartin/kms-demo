@@ -1,1 +1,68 @@
 # kms-demo
+A KMS demo application to demonstrate a KMS encrypt and decrypt for passwords storing it in Secret Manager.
+
+## Deployment
+
+### Prerequisites
+
+* [Node.js version 12.0.0 or later](https://nodejs.org/) to run Node scripts
+* [AWS account](https://aws.amazon.com/) to create resources
+* [AWS CLI version 2](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html) to run scripts
+* [Git Bash](https://git-scm.com/) to run Bash scripts (only on Windows)
+
+### 1) Configure AWS CLI
+
+Run `aws configure` to set your credentials and the region where you want the demo resources deployed.
+
+### 2) Run deployment script
+
+Go to the **deployment** folder and run:
+
+`bash deploy.sh`.
+
+This will deploy the demo infrastructure in AWS.
+
+## Usage
+
+At the end of the deploy.sh execution, you will see in the output of CloudFormation the **DecryptApi** and **EncryptApi** endpoints.
+
+![output](img/stackoutput.png)
+
+Now you can *Encrypt* and *Decrypt* the password storing it in Secret Manager.
+### Encrypt your password
+Go to **Postman** (or any API client) to use the service with the following parameters:
+
+```shell
+{
+    "keyid": "<Key ID>",
+    "password": "<Password you want to encrypt>"
+}
+```
+
+> **Important Note:**<br>
+> The Key ID **must** exist and your Account ID **must** have permission on it.
+
+The output will be the *CiphertextBlob* as follow:
+
+![encrypt](img/encrypt.png)
+
+### Decrypt your password
+Go to **Postman** (or any API client) to use the service with the following parameters:
+```shell
+{
+    "CiphertextBlob": "<CiphertextBlob provided by the encryption process>",
+    "name": "<Name of the password in Secret Manager>",
+    "description": "<A description for Secret Manager>"
+}
+```
+The output will be the *ARN* of the item added in Secret Manager as follow:
+
+![decrypt](img/decrypt.png)
+
+We can check this new item in Secret Manager:
+
+![kms](img/kms.png)
+
+And take a look for the encrypted password:
+
+![pass](img/kms-pass.png)
