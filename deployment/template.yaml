@@ -37,13 +37,14 @@ Resources:
         MaxAge: 600
 
   KmsDemoApiDeployment:
-    DependsOn: [KmsDemoApiRoute]
+    DependsOn: [KmsDemoApiRoute, KmsDemoApiCreateRoute]
     Type: AWS::ApiGatewayV2::Deployment
     Properties:
       ApiId: !Ref KmsDemoApi
       StageName: demo
 
   KmsDemoApiRoute:
+    DependsOn: [KmsDemoApiIntegration]
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref KmsDemoApi
@@ -53,7 +54,9 @@ Resources:
         - /
         - - integrations
           - !Ref KmsDemoApiIntegration
+
   KmsDemoApiCreateRoute:
+    DependsOn: [KmsDemoApiCreateIntegration]
     Type: AWS::ApiGatewayV2::Route
     Properties:
       ApiId: !Ref KmsDemoApi
@@ -113,6 +116,7 @@ Resources:
               - Effect: "Allow"
                 Action: "lambda:InvokeFunction"
                 Resource: "*"
+  
   LambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -168,8 +172,8 @@ Outputs:
   
   ApiEncryt:
     Description: KMS demo REST API Gateway endpoint URL - /encrypt
-    Value: !Sub "https://${KmsDemoApiCreateIntegration}.execute-api.${AWS::Region}.amazonaws.com/${KmsDemoApiStage}/encrypt"
+    Value: !Sub "https://${KmsDemoApi}.execute-api.${AWS::Region}.amazonaws.com/${KmsDemoApiStage}/encrypt"
   
   ApiDecryt:
     Description: KMS demo REST API Gateway endpoint URL - /decrypt
-    Value: !Sub "https://${KmsDemoApiCreateIntegration}.execute-api.${AWS::Region}.amazonaws.com/${KmsDemoApiStage}/decrypt"
+    Value: !Sub "https://${KmsDemoApi}.execute-api.${AWS::Region}.amazonaws.com/${KmsDemoApiStage}/decrypt"
