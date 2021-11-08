@@ -15,7 +15,7 @@ A KMS demo application to demonstrate a KMS encrypt and decrypt for passwords st
 Run `aws configure` to set your credentials and the region where you want the demo resources deployed.
 
 > **Important Note:**<br>
-> - The Key ID from KMS **must** be created at the **same Region** as the rest of the stack.
+> - The Key ID from KMS **must** be created at the **same Region** of the rest of the stack.
 ### 2) Run deployment script
 
 Go to the **deployment** folder and run:
@@ -45,7 +45,7 @@ Go to **Postman** (or any API client) to use the service with the following para
 
 > **Important Notes:**<br>
 > - The Key ID **must** exist and your Account ID **must** have permission on it.
-> - The Key ID **must** be created at the **same Region** as the rest of the stack.
+> - The Key ID **must** be created at the **same Region** of the rest of the stack.
 
 The output will be the *CiphertextBlob* as follow:
 
