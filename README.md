@@ -41,8 +41,9 @@ Go to **Postman** (or any API client) to use the service with the following para
 }
 ```
 
-> **Important Note:**<br>
-> The Key ID **must** exist and your Account ID **must** have permission on it.
+> **Important Notes:**<br>
+> - The Key ID **must** exist and your Account ID **must** have permission on it.
+> - The Key ID **must** be created in the **same Region** as the rest of the stack.
 
 The output will be the *CiphertextBlob* as follow:
 

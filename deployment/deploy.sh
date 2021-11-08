@@ -10,8 +10,12 @@ printf "\nGenerating Lambda functions zip files...\n"
 node zip-generator.js ../serverless/decrypt
 node zip-generator.js ../serverless/encrypt
 
-
-aws s3api create-bucket --bucket kms-demo-lambda-bucket --region ${region}
+if [ ${region} == 'us-east-1' ]
+then
+    aws s3api create-bucket --bucket kms-demo-lambda-bucket --region ${region}
+else
+    aws s3api create-bucket --bucket kms-demo-lambda-bucket --region ${region} --create-bucket-configuration LocationConstraint=${region}
+fi
 
 aws s3 cp decrypt.zip s3://kms-demo-lambda-bucket/
 aws s3 cp encrypt.zip s3://kms-demo-lambda-bucket/
