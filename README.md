@@ -79,14 +79,3 @@ And take a look for the encrypted password:
 ![pass](img/kms-pass.png)
 
 <br>
-
-## Working Example
-
-The following parameters can be used for an actual working environment:
-
-- Keyid: "6b2a4f1c-42f6-4b0e-94c9-d5cb97a61e6a"
-- EncryptAPI: https://mxlcq2uq60.execute-api.us-east-1.amazonaws.com/demo/encrypt
-- DecryptAPI: https://mxlcq2uq60.execute-api.us-east-1.amazonaws.com/demo/decrypt
-
-> **Note:**<br>
-> You would be able to decrypt and store a secret but not to see it in Secret Manager as you would need a user for that.
